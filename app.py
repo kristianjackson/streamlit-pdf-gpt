@@ -82,8 +82,7 @@ def get_initial_message():
             Use a mix of technical and colloquial US english language to create an accessible and engaging tone.
             Provide your answers using professional language that an executive would appreciate.
             """},
-            {"role": "user", "content": "I want to learn about the legislation contained in the PDF that I uploaded"},
-            {"role": "assistant", "content": "Fine and good day. Here is a summary of the document that was uploaded:"}
+            {"role": "user", "content": "Please introduce yourself"}
         ]
     return messages
 
