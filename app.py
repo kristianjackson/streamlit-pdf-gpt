@@ -2,6 +2,65 @@
 import streamlit as st
 from streamlit_chat import message
 import openai
+import os 
+from langchain.chains import RetrievalQA
+from langchain.llms import OpenAI
+from langchain.document_loaders import TextLoader
+from langchain.document_loaders import PyPDFLoader
+from langchain.indexes import VectorstoreIndexCreator
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+import tempfile
+
+def qa(file, query, chain_type, k):
+    # load document
+    loader = PyPDFLoader(file)
+    documents = loader.load()
+    # split the documents into chunks
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    texts = text_splitter.split_documents(documents)
+    # select which embeddings we want to use
+    embeddings = OpenAIEmbeddings()
+    # create the vectorestore to use as the index
+    db = Chroma.from_documents(texts, embeddings)
+    # expose this index in a retriever interface
+    retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": k})
+    # create a chain to answer questions 
+    qa = RetrievalQA.from_chain_type(
+        llm=OpenAI(), chain_type=chain_type, retriever=retriever, return_source_documents=True)
+    result = qa({"query": query})
+    print(result['result'])
+    return result
+
+convos = []  # store all panel objects in a list
+
+def qa_result(_):
+     
+    # save pdf file to a temp file 
+    if file_input.value is not None:
+        file_input.save("/.cache/temp.pdf")
+    
+        prompt_text = prompt.value
+        if prompt_text:
+            result = qa(file="/.cache/temp.pdf", query=prompt_text, chain_type=select_chain_type.value, k=select_k.value)
+            convos.extend([
+                pn.Row(
+                    pn.panel("\U0001F60A", width=10),
+                    prompt_text,
+                    width=600
+                ),
+                pn.Row(
+                    pn.panel("\U0001F916", width=10),
+                    pn.Column(
+                        result["result"],
+                        "Relevant source text:",
+                        pn.pane.Markdown('\n--------------------------------------------------------------------\n'.join(doc.page_content for doc in result["source_documents"]))
+                    )
+                )
+            ])
+            #return convos
+    return pn.Column(*convos, margin=15, width=575, min_height=400)
 
 st.set_page_config(page_title="Kristian's Chat with PDFs")
 st.title("KCP")
