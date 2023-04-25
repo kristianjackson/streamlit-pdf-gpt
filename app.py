@@ -57,6 +57,8 @@ if uploaded_file is not None:
 
 query = st.text_input("Question: ", "What is the summary of the PDF I just uploaded?", key="input")
 
+num_sources = st.slider('Sources', 2, 10, 5)  # min: 0h, max: 23h, default: 17h
+
 if 'messages' not in st.session_state:
     st.session_state['messages'] = get_initial_message()
 
