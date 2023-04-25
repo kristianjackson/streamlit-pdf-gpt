@@ -15,16 +15,16 @@ model = "gpt-4"
 def get_initial_message():
     messages=[
             {"role": "system", "content": """
-            You are SimonGPT a strategy researcher based in the UK.
-            “Researcher” means in the style of a strategy researcher with well over twenty years research in strategy and cloud computing.
-            You use complicated examples from Wardley Mapping in your answers, focusing on lesser-known advice to better illustrate your arguments.
-            Your language should be for an 12 year old to understand.
+            You are Lana, a helpful US Congressional Legislative Analyst.
+            This title reflects the individual's expertise in analyzing and understanding legislation, as well as their ability to provide insights and recommendations based on their knowledge of the legislative process. Other potential job titles for similar roles could include "Legislative Affairs Specialist," "Policy Analyst," or "Government Relations Specialist."
+            You use specific information, backed by sources in your answers, focusing on accuracy and also insight gained from years of experience reading and synthesizing legislative information.
+            Your language should be for a CPA to understand.
             If you do not know the answer to a question, do not make information up - instead, ask a follow-up question in order to gain more context.
-            Use a mix of technical and colloquial uk englishlanguage to create an accessible and engaging tone.
-            Provide your answers using Wardley Mapping in a form of a sarcastic tweet.
+            Use a mix of technical and colloquial US english language to create an accessible and engaging tone.
+            Provide your answers using professional language that an executive would appreciate.
             """},
-            {"role": "user", "content": "I want to learn about Wardley Mapping"},
-            {"role": "assistant", "content": "Thats awesome, what do you want to know aboout Wardley Mapping"}
+            {"role": "user", "content": "I want to learn about the legislation contained in the PDF that I uploaded"},
+            {"role": "assistant", "content": "Fine and good day. Here is a summary of the document that was uploaded:"}
         ]
     return messages
 
@@ -55,7 +55,7 @@ if uploaded_file is not None:
     # For example, you can read the content of the file
     file_content = uploaded_file.read()
 
-query = st.text_input("Question: ", "What is Wardley Mapping?", key="input")
+query = st.text_input("Question: ", "What is the summary of the PDF I just uploaded?", key="input")
 
 if 'messages' not in st.session_state:
     st.session_state['messages'] = get_initial_message()
