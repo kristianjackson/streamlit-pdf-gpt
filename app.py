@@ -1,35 +1,67 @@
-# Import the Streamlit library
+# Importing required packages
 import streamlit as st
+from streamlit_chat import message
+import openai
 
-# Define the main function that will run the Streamlit app
-def main():
-    # Set the title of the app
-    st.title("Kristian's Chat with PDF App!")
+st.set_page_config(page_title="Kristian's Chat with PDFs")
+st.title("KCP")
+st.sidebar.markdown("Developed by Kristian Jackson](https://twitter.com/RealKrisJackson)", unsafe_allow_html=True)
+st.sidebar.markdown("Current Version: 1.0.1")
+st.sidebar.markdown("Not optimised")
+st.sidebar.markdown("May run out of OpenAI credits")
 
-    # Add a header to the app
-    st.header("Welcome to Kristian's Chat with PDF App!")
+model = "gpt-4"
 
-    # Add a text input widget for the OpenAI API Key (treated as a password field)
-    api_key = st.text_input("OpenAI API Key:", type="password")
+def get_initial_message():
+    messages=[
+            {"role": "system", "content": """
+            You are SimonGPT a strategy researcher based in the UK.
+            “Researcher” means in the style of a strategy researcher with well over twenty years research in strategy and cloud computing.
+            You use complicated examples from Wardley Mapping in your answers, focusing on lesser-known advice to better illustrate your arguments.
+            Your language should be for an 12 year old to understand.
+            If you do not know the answer to a question, do not make information up - instead, ask a follow-up question in order to gain more context.
+            Use a mix of technical and colloquial uk englishlanguage to create an accessible and engaging tone.
+            Provide your answers using Wardley Mapping in a form of a sarcastic tweet.
+            """},
+            {"role": "user", "content": "I want to learn about Wardley Mapping"},
+            {"role": "assistant", "content": "Thats awesome, what do you want to know aboout Wardley Mapping"}
+        ]
+    return messages
 
-    # Add a file uploader widget for PDF files
-    uploaded_file = st.file_uploader("Upload PDF file:", type=["pdf"])
+def get_chatgpt_response(messages, model=model):
+    print("model: ", model)
+    response = openai.ChatCompletion.create(
+    model=model,
+    messages=messages
+    )
+    return response['choices'][0]['message']['content']
 
-    # Add a text area widget for output
-    output = st.text_area("Output:", value="", height=300)
+def update_chat(messages, role, content):
+    messages.append({"role": role, "content": content})
+    return messages
 
-    # Add a text input widget for questions
-    question = st.text_input("Question:")
+if 'generated' not in st.session_state:
+    st.session_state['generated'] = []
+    
+if 'past' not in st.session_state:
+    st.session_state['past'] = []
 
-    # Add a selectbox widget for selecting the number of sources
-    num_sources = st.selectbox("Number of Sources:", options=list(range(1, 11)))
+query = st.text_input("Question: ", "What is Wardley Mapping?", key="input")
 
-    # Add a button to the app
-    if st.button("Run"):
-        # Implement the logic for processing the PDF, answering questions, etc.
-        # The results should be displayed in the "Output" text area
-        st.write("Running... (Implement the logic here)")
+if 'messages' not in st.session_state:
+    st.session_state['messages'] = get_initial_message()
 
-# Run the main function to start the Streamlit app
-if __name__ == "__main__":
-    main()
+if query:
+    with st.spinner("generating..."):
+        messages = st.session_state['messages']
+        messages = update_chat(messages, "user", query)
+        response = get_chatgpt_response(messages, model)
+        messages = update_chat(messages, "assistant", response)
+        st.session_state.past.append(query)
+        st.session_state.generated.append(response)
+
+if st.session_state['generated']:
+
+    for i in range(len(st.session_state['generated'])-1, -1, -1):
+        message(st.session_state["generated"][i], key=str(i))
+        message(st.session_state['past'][i], is_user=True, key=str(i) + '_user')
