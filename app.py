@@ -46,6 +46,15 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
+# Add a file uploader widget and restrict the file type to PDF
+uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
+
+# Check if a file has been uploaded
+if uploaded_file is not None:
+    # Perform any actions you want with the uploaded file here
+    # For example, you can read the content of the file
+    file_content = uploaded_file.read()
+
 query = st.text_input("Question: ", "What is Wardley Mapping?", key="input")
 
 if 'messages' not in st.session_state:
